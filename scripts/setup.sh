@@ -1,8 +1,9 @@
 #!/bin/bash
 
 install_tools() {
-  sudo apt-get install -y sysstat collectd git \
-    librrds-perl libjson-perl libhtml-parser-perl apache2
+  sudo apt-get update && \
+  sudo apt-get install -y sysstat collectd \
+    librrds-perl libjson-perl libhtml-parser-perl
 }
 
 configure_sysstat() {
@@ -13,9 +14,10 @@ configure_sysstat() {
 configure_collectd() {
   sudo service collectd start
 
-  cd /var/www/html
-  sudo git clone https://github.com/httpdss/collectd-web.git
-  sudo chmod +x /var/www/html/collectd-web/cgi-bin/graphdefs.cgi
+  cd /usr/local/
+  git clone https://github.com/httpdss/collectd-web.git
+  cd collectd-web/
+  chmod +x cgi-bin/graphdefs.cgi
 }
 
 configure_appache2() {
@@ -25,11 +27,16 @@ configure_appache2() {
   sudo service apache2 restart
 }
 
+start_cgi_server() {
+  cd collectd-web/
+  sudo ./runserver.py &
+}
 main(){
   install_tools
   configure_sysstat
   configure_collectd
-  configure_appache2
+  #configure_appache2
+  start_cgi_server
 }
 
 main "$@"
